@@ -1,0 +1,323 @@
+Diagram 1: The Three Defense Paradigms — Overview
+This is your main figure. It shows the three defenses side by side, what they protect, and how.
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    THE THREE PILLARS OF MCP DEFENSE                             │
+│                                                                                 │
+│  ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐          │
+│  │      CaMeL        │  │       ADR         │  │  LlamaFirewall    │          │
+│  │  (Google DeepMind)│  │      (Uber)       │  │      (Meta)       │          │
+│  │                   │  │                   │  │                   │          │
+│  │  🏛️ ARCHITECTURAL │  │  🕵️ DETECTION &   │  │  🛡️ GUARDRAIL     │          │
+│  │                   │  │     RESPONSE      │  │                   │          │
+│  └─────────┬─────────┘  └─────────┬─────────┘  └─────────┬─────────┘          │
+│            │                      │                      │                     │
+│            ▼                      ▼                      ▼                     │
+│  ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐          │
+│  │  HOW IT WORKS     │  │  HOW IT WORKS     │  │  HOW IT WORKS     │          │
+│  │                   │  │                   │  │                   │          │
+│  │ • Separates       │  │ • Monitors full   │  │ • PromptGuard 2   │          │
+│  │   control flow    │  │   causal chain    │  │   (injection      │          │
+│  │   from data flow  │  │   (prompt →       │  │   detection)      │          │
+│  │                   │  │   reasoning →     │  │                   │          │
+│  │ • Untrusted data  │  │   tool call →     │  │ • AlignmentCheck  │          │
+│  │   cannot give     │  │   outcome)        │  │   (goal hijack    │          │
+│  │   commands        │  │                   │  │   detection)      │          │
+│  │                   │  │ • Two-tier:       │  │                   │          │
+│  │ • "Capabilities"  │  │   fast filter +   │  │ • CodeShield      │          │
+│  │   prevent data    │  │   LLM analysis    │  │   (static code    │          │
+│  │   exfiltration    │  │                   │  │   analysis)       │          │
+│  └─────────┬─────────┘  └─────────┬─────────┘  └─────────┬─────────┘          │
+│            │                      │                      │                     │
+│            ▼                      ▼                      ▼                     │
+│  ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐          │
+│  │  PROTECTS AGAINST │  │  PROTECTS AGAINST │  │  PROTECTS AGAINST │          │
+│  │                   │  │                   │  │                   │          │
+│  │ ✅ Direct PI      │  │ ✅ Direct PI      │  │ ✅ Direct PI      │          │
+│  │ ✅ Indirect PI    │  │ ✅ Indirect PI    │  │ ✅ Indirect PI    │          │
+│  │ ✅ Data exfil     │  │ ✅ Credential     │  │ ✅ Goal hijack    │          │
+│  │                   │  │   theft           │  │                   │          │
+│  │                   │  │ ✅ Destructive    │  │ ✅ Insecure code  │          │
+│  │                   │  │   commands        │  │                   │          │
+│  └─────────┬─────────┘  └─────────┬─────────┘  └─────────┬─────────┘          │
+│            │                      │                      │                     │
+│            ▼                      ▼                      ▼                     │
+│  ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐          │
+│  │  ❌ MISSES        │  │  ❌ MISSES        │  │  ❌ MISSES        │          │
+│  │                   │  │                   │  │                   │          │
+│  │ • Tool poisoning  │  │ • Tool poisoning  │  │ • Tool poisoning  │          │
+│  │ • Memory poisoning│  │ • Memory poisoning│  │ • Memory poisoning│          │
+│  │ • Protocol flaws  │  │ • Protocol flaws  │  │ • Protocol flaws  │          │
+│  │ • Cross-session   │  │ • Cross-session   │  │ • Cross-session   │          │
+│  └───────────────────┘  └───────────────────┘  └───────────────────┘          │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+Diagram 2: The Coverage Gap — "Three Locks on the Front Door"
+This diagram is your key contribution. It visually shows the misallocation.
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    THE COVERAGE GAP IN MCP DEFENSE                              │
+│                                                                                 │
+│                         ┌─────────────────────┐                                 │
+│                         │   THE AI AGENT      │                                 │
+│                         │                     │                                 │
+│                         │  (Being Protected)  │                                 │
+│                         └──────────┬──────────┘                                 │
+│                                    │                                            │
+│            ┌───────────────────────┼───────────────────────┐                    │
+│            │                       │                       │                    │
+│            ▼                       ▼                       ▼                    │
+│  ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐              │
+│  │   FRONT DOOR    │   │   BACK DOOR     │   │ BASEMENT WINDOW │              │
+│  │                 │   │                 │   │                 │              │
+│  │  Prompt         │   │  Tool           │   │  Memory         │              │
+│  │  Injection      │   │  Poisoning      │   │  Poisoning      │              │
+│  │                 │   │                 │   │                 │              │
+│  │ ┌─────┐┌─────┐  │   │                 │   │                 │              │
+│  │ │CaMeL││ ADR │  │   │    (NO          │   │    (NO          │              │
+│  │ └─────┘└─────┘  │   │     DEFENSE)    │   │     DEFENSE)    │              │
+│  │ ┌───────────┐   │   │                 │   │                 │              │
+│  │ │LlamaFW    │   │   │    ❌           │   │    ❌           │              │
+│  │ └───────────┘   │   │    WIDE OPEN    │   │    WIDE OPEN    │              │
+│  │                 │   │                 │   │                 │              │
+│  │ ✅ TRIPLE       │   │                 │   │                 │              │
+│  │    PROTECTED    │   │                 │   │                 │              │
+│  └─────────────────┘   └─────────────────┘   └─────────────────┘              │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                         THE MISALLOCATION                               │   │
+│  │                                                                         │   │
+│  │   Research Effort:  ████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░   │   │
+│  │                     └──── Prompt Injection ────┘└── Everything Else ──┘   │   │
+│  │                                                                         │   │
+│  │   Actual Coverage:  ████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░   │   │
+│  │                     └──── Prompt Injection ────┘└── Everything Else ──┘   │   │
+│  │                                                                         │   │
+│  │   Threat Landscape: ████████████░░░░░░░░░░░░░░████████████████████████   │   │
+│  │                     └ Prompt Inj ─┘└ Tool/Memory/Protocol ────────────┘   │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+Diagram 3: How Each Defense Works — Internal Mechanism
+This diagram explains the technical mechanism of each defense.
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    HOW EACH DEFENSE WORKS INTERNALLY                            │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                        CaMeL (ARCHITECTURAL)                            │   │
+│  │                                                                         │   │
+│  │   User Query ──► ┌──────────────┐ ──► ┌──────────────┐ ──► Tool Call   │   │
+│  │   (TRUSTED)      │   TRUSTED    │     │   UNTRUSTED  │                 │   │
+│  │                  │   PLANNER    │     │   DATA       │                 │   │
+│  │                  │   (LLM #1)   │     │   (LLM #2)   │                 │   │
+│  │                  └──────────────┘     └──────────────┘                 │   │
+│  │                         │                     │                        │   │
+│  │                         │                     │                        │   │
+│  │                         ▼                     ▼                        │   │
+│  │                  ┌──────────────────────────────────┐                  │   │
+│  │                  │   CONTROL FLOW ≠ DATA FLOW       │                  │   │
+│  │                  │   Untrusted data CANNOT          │                  │   │
+│  │                  │   influence the planner          │                  │   │
+│  │                  └──────────────────────────────────┘                  │   │
+│  │                                                                         │   │
+│  │   🔑 KEY: Prevention by design. The attack never reaches the brain.    │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                        ADR (DETECTION & RESPONSE)                       │   │
+│  │                                                                         │   │
+│  │   ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐            │   │
+│  │   │ PROMPT  │───►│REASONING│───►│TOOL CALL│───►│ OUTCOME │            │   │
+│  │   └─────────┘    └─────────┘    └─────────┘    └─────────┘            │   │
+│  │        │              │              │              │                   │   │
+│  │        └──────────────┴──────────────┴──────────────┘                   │   │
+│  │                              │                                          │   │
+│  │                              ▼                                          │   │
+│  │              ┌───────────────────────────────┐                          │   │
+│  │              │     SENSOR (Telemetry)        │                          │   │
+│  │              │  Captures full causal chain   │                          │   │
+│  │              └───────────────┬───────────────┘                          │   │
+│  │                              │                                          │   │
+│  │                              ▼                                          │   │
+│  │              ┌───────────────────────────────┐                          │   │
+│  │              │   DETECTOR (Two-Tier)         │                          │   │
+│  │              │  Tier 1: Fast filter          │                          │   │
+│  │              │  Tier 2: LLM deep analysis    │                          │   │
+│  │              └───────────────┬───────────────┘                          │   │
+│  │                              │                                          │   │
+│  │                              ▼                                          │   │
+│  │              ┌───────────────────────────────┐                          │   │
+│  │              │   ALERT / BLOCK / RESPOND     │                          │   │
+│  │              └───────────────────────────────┘                          │   │
+│  │                                                                         │   │
+│  │   🔑 KEY: Detection after the fact. Catches attacks as they happen.     │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                        LlamaFirewall (GUARDRAIL)                        │   │
+│  │                                                                         │   │
+│  │   INPUT ──► ┌──────────────┐ ──► ┌──────────────┐ ──► ┌──────────┐   │   │
+│  │             │ PromptGuard2 │     │ Alignment    │     │CodeShield│   │   │
+│  │             │              │     │ Check        │     │          │   │   │
+│  │             │ (Injection   │     │ (Goal hijack │     │(Insecure │   │   │
+│  │             │  detection)  │     │  detection)  │     │ code)    │   │   │
+│  │             └──────┬───────┘     └──────┬───────┘     └────┬─────┘   │   │
+│  │                    │                    │                   │         │   │
+│  │                    └────────────────────┴───────────────────┘         │   │
+│  │                                         │                            │   │
+│  │                                         ▼                            │   │
+│  │                              ┌─────────────────────┐                 │   │
+│  │                              │  PASS / BLOCK       │                 │   │
+│  │                              └─────────────────────┘                 │   │
+│  │                                                                         │   │
+│  │   🔑 KEY: Filtering at the boundary. Blocks what looks malicious.      │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+Diagram 4: The 3-in-1 Architecture — Benefits and Blind Spots
+This diagram shows what happens when you combine all three.
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    THE 3-IN-1 ARCHITECTURE & ITS BLIND SPOTS                    │
+│                                                                                 │
+│                         ┌─────────────────────────┐                             │
+│                         │    THE ORCHESTRATOR     │                             │
+│                         │  (Coordinates defenses)  │                             │
+│                         └────────────┬────────────┘                             │
+│                                      │                                          │
+│            ┌─────────────────────────┼─────────────────────────┐                │
+│            │                         │                         │                │
+│            ▼                         ▼                         ▼                │
+│  ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐          │
+│  │     CaMeL       │     │      ADR        │     │  LlamaFirewall  │          │
+│  │                 │     │                 │     │                 │          │
+│  │  Prevent by     │     │  Detect and     │     │  Filter at      │          │
+│  │  design         │     │  respond        │     │  boundary       │          │
+│  └────────┬────────┘     └────────┬────────┘     └────────┬────────┘          │
+│           │                       │                       │                    │
+│           └───────────────────────┼───────────────────────┘                    │
+│                                   │                                            │
+│                                   ▼                                            │
+│                    ┌─────────────────────────────┐                             │
+│                    │      THE AI AGENT           │                             │
+│                    │                             │                             │
+│                    │  ✅ Triple-protected        │                             │
+│                    │     against prompt injection│                             │
+│                    └─────────────────────────────┘                             │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    WHAT THE 3-IN-1 COVERS                               │   │
+│  │                                                                         │   │
+│  │   ✅ Direct Prompt Injection      ──► Triple covered                    │   │
+│  │   ✅ Indirect Prompt Injection    ──► Triple covered                    │   │
+│  │   ✅ Data Exfiltration            ──► Covered by CaMeL                  │   │
+│  │   ✅ Credential Theft             ──► Covered by ADR                    │   │
+│  │   ✅ Insecure Code                ──► Covered by CodeShield             │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    WHAT THE 3-IN-1 MISSES                               │   │
+│  │                                                                         │   │
+│  │   ❌ Tool Poisoning               ──► ZERO coverage                     │   │
+│  │      (Malicious tool lies about what it does)                          │   │
+│  │                                                                         │   │
+│  │   ❌ Memory Poisoning             ──► ZERO coverage                     │   │
+│  │      (Attack activates in a future session)                            │   │
+│  │                                                                         │   │
+│  │   ❌ Protocol Flaws               ──► ZERO coverage                     │   │
+│  │      (MCP specification itself is broken)                              │   │
+│  │                                                                         │   │
+│  │   ❌ Cross-Session Attacks        ──► ZERO coverage                     │   │
+│  │      (Attack spans multiple conversations)                             │   │
+│  │                                                                         │   │
+│  │   ❌ Multi-Agent Authorization    ──► ZERO coverage                     │   │
+│  │      (Permissions leak across agents)                                  │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    THE FALSE CONFIDENCE PROBLEM                         │   │
+│  │                                                                         │   │
+│  │   "We deployed all three defenses. We're secure."                      │   │
+│  │                                                                         │   │
+│  │   Reality:                                                              │   │
+│  │   ┌─────────────────────────────────────────────────────────────────┐   │   │
+│  │   │  Prompt Injection  │████████████████████████████████│ 100%     │   │   │
+│  │   │  Tool Poisoning    │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│ 0%       │   │   │
+│  │   │  Memory Poisoning  │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│ 0%       │   │   │
+│  │   │  Protocol Flaws    │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│ 0%       │   │   │
+│  │   └─────────────────────────────────────────────────────────────────┘   │   │
+│  │                                                                         │   │
+│  │   Three locks on the front door. Nothing on the back.                  │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+Diagram 5: The Research Agenda — Where to Build Next
+This diagram shows your recommendation for the field.
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    WHERE RESEARCH SHOULD GO NEXT                                │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    CURRENT STATE (2024-2026)                            │   │
+│  │                                                                         │   │
+│  │   Prompt Injection Defense:  ████████████████████████████████  95%     │   │
+│  │   Tool Poisoning Defense:    ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   5%     │   │
+│  │   Memory Poisoning Defense:  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%     │   │
+│  │   Protocol Fixes:            █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   2%     │   │
+│  │   Multi-Agent Auth:          ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%     │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│                                      │                                          │
+│                                      ▼                                          │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    RECOMMENDED STATE (Next 2-3 Years)                   │   │
+│  │                                                                         │   │
+│  │   Prompt Injection Defense:  ████████████████████░░░░░░░░░░░░  60%     │   │
+│  │   Tool Poisoning Defense:    ████████████████████████████████  90%     │   │
+│  │   Memory Poisoning Defense:  ████████████████████████████████  90%     │   │
+│  │   Protocol Fixes:            ████████████████████████████████  90%     │   │
+│  │   Multi-Agent Auth:          ████████████████████████████████  90%     │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    THE FOUR RESEARCH PRIORITIES                         │   │
+│  │                                                                         │   │
+│  │   ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐        │   │
+│  │   │  #1             │  │  #2             │  │  #3             │        │   │
+│  │   │  TOOL           │  │  MEMORY         │  │  PROTOCOL       │        │   │
+│  │   │  POISONING      │  │  POISONING      │  │  FIXES          │        │   │
+│  │   │                 │  │                 │  │                 │        │   │
+│  │   │  Verify tool    │  │  Detect and     │  │  Fix MCP        │        │   │
+│  │   │  behavior       │  │  sanitize       │  │  specification  │        │   │
+│  │   │  matches        │  │  cross-session  │  │  (Paper 39)     │        │   │
+│  │   │  description    │  │  memory         │  │                 │        │   │
+│  │   │  (Paper 24)     │  │  (Papers 22,34) │  │                 │        │   │
+│  │   └─────────────────┘  └─────────────────┘  └─────────────────┘        │   │
+│  │                                                                         │   │
+│  │   ┌─────────────────┐                                                   │   │
+│  │   │  #4             │                                                   │   │
+│  │   │  MULTI-AGENT    │                                                   │   │
+│  │   │  AUTHORIZATION  │                                                   │   │
+│  │   │                 │                                                   │   │
+│  │   │  Track          │                                                   │   │
+│  │   │  permission     │                                                   │   │
+│  │   │  propagation    │                                                   │   │
+│  │   │  (Paper 41)     │                                                   │   │
+│  │   └─────────────────┘                                                   │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
